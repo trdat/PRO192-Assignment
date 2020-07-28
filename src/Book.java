@@ -1,14 +1,9 @@
 
 import java.util.ArrayList;
 
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 /**
  *
- * @author trduy
+ * @author Dat Duy Tran
  */
 public class Book {
 
@@ -59,4 +54,10 @@ public class Book {
         this.price = price;
     }
 
+    @Override
+    public String toString() {
+//        return this.code + "  |  " + this.title + "  |  " + this.qua + "  |  " + this.price;
+        return String.format("%-15s%-15s%-15s%-15.2f\n", this.code,
+                this.title, this.qua, this.price);
+    }
 }
