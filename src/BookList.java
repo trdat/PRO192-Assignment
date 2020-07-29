@@ -6,8 +6,9 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -21,6 +22,14 @@ public class BookList implements IBook {
         this.t = new ArrayList<>();
     }
 
+    /**
+     * To check whether this code (as parameter) does exist or not. Return -1 if
+     * it does not, otherwise return the index of exists code in List
+     *
+     * @param t
+     * @param code
+     * @return
+     */
     public static int doesCodeExist(ArrayList<Book> t, String code) {
         for (int i = 0; i < t.size(); i++) {
             if (t.get(i).getCode().equals(code)) {
@@ -30,8 +39,13 @@ public class BookList implements IBook {
         return -1;
     }
 
+    /**
+     * Input & add book(s) to the end.
+     *
+     * @throws IOException
+     */
     @Override
-    public void addOnes() {
+    public void addOnes() throws IOException {
         String code;
         int numberOfBooksToAdd = GetInput.Integer("Enter number of books you want to add");
         int existStatus;
@@ -42,22 +56,28 @@ public class BookList implements IBook {
                 code = GetInput.String("Enter code");
                 existStatus = doesCodeExist(t, code);
 
+                // the book’s code must be unique in the list.
                 if (existStatus != -1) {
                     System.out.printf("\nError: The book code entered has already been existed (code = %s). Please try again!\n", code);
                 }
             } while (existStatus != -1);
 
             String title = GetInput.String("Enter title");
-            int qua = GetInput.Integer("Enter amount");
-            double price = GetInput.Double("Enter price");
+            int qua = GetInput.Integer("Enter amount", 0, Integer.MAX_VALUE);
+            double price = GetInput.Double("Enter price", 0);
 
-            Book aNewBook = new Book(code, title, qua, price);
-            t.add(aNewBook);
-
-            System.out.println("Successful: You added a new book into library");
+            t.add(new Book(code, title, qua, price));
+            saveDataToFile();
+            System.out.println("\nSuccessful: You added a new book into database");
         }
+
+        // update book list from database
+        loadDataFromFile(false);
     }
 
+    /**
+     * Display all books in list following format
+     */
     @Override
     public void displayAllBooks() {
         if (t.isEmpty()) {
@@ -74,6 +94,9 @@ public class BookList implements IBook {
         }
     }
 
+    /**
+     * Search a book for given code.
+     */
     @Override
     public void searchByCode() {
         String code;
@@ -99,6 +122,9 @@ public class BookList implements IBook {
 
     }
 
+    /**
+     * Update the book’s price for given code.
+     */
     @Override
     public void updatePriceByCode() {
         double price;
@@ -113,57 +139,126 @@ public class BookList implements IBook {
         } else {
             System.out.printf("\nError: The book with the code %s does not exist. Please try again!\n", code);
         }
+
+        try {
+            saveDataToFile();
+        } catch (IOException ex) {
+            Logger.getLogger(BookList.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
     }
 
+    /**
+     * Find and return the index of the (first) max value.
+     *
+     * @return eMaxPosition
+     */
     @Override
-    public void findMaxPrice() {
+    public int findMaxPriceIndex() {
         double eMaxPrice = t.get(0).getPrice();
         double ePrice;
+        int eMaxIndex = -1;
+        boolean isFirst = true;
 
-        for (int i = 1; i < t.size(); i++) {
-            ePrice = t.get(i).getPrice();
-            if (eMaxPrice < ePrice) {
-                eMaxPrice = ePrice;
+        if (t.isEmpty()) {
+            return eMaxIndex;
+        } else {
+            // to get the max price value in list of books
+            for (int i = 1; i < t.size(); i++) {
+                ePrice = t.get(i).getPrice();
+                if (eMaxPrice < ePrice) {
+                    eMaxPrice = ePrice;
+                }
+            }
+
+            // to get the (first) position of max price value in list of books
+            for (int i = 0; i < t.size(); i++) {
+                ePrice = t.get(i).getPrice();
+                if (ePrice == eMaxPrice) {
+                    eMaxIndex = i;
+                    break;
+                }
             }
         }
 
-        if (t.isEmpty()) {
+        return eMaxIndex;
+    }
+
+    /**
+     * Find the max value price and its (first) index in book list
+     */
+    @Override
+    public void printMaxPriceValue() {
+        int maxIndex = findMaxPriceIndex();
+
+        if (maxIndex == -1) {
             System.out.println("\nError: The list of books is empty now!");
         } else {
-            System.out.println("\nMax price: " + eMaxPrice);
+            System.out.println("\nMax price value: " + t.get(maxIndex).getPrice() + "\n(in the index " + maxIndex + ")");
         }
     }
 
+    /**
+     * Sort the list ascending by code.
+     */
     @Override
     public void sortByCode() {
         Collections.sort(t, (Book o1, Book o2) -> {
             return o1.getCode().compareTo(o2.getCode());
         });
-        System.out.println("\nSuccessful! The list of book has been sorted ascendingly by their code.");
+
+        try {
+            saveDataToFile();
+        } catch (IOException ex) {
+            Logger.getLogger(BookList.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
+        System.out.println("\nSuccessful! The list of book has been sorted ascending by their code.");
     }
 
+    /**
+     * Remove the book having given code.
+     */
     @Override
     public void removeByCode() {
         String code = GetInput.String("Enter code");
 
-        if (true) {
+        int pos = doesCodeExist(t, code);
+
+        if (pos == -1) {
             System.err.printf("\nFailed! The book with code \"%s\" does not exists.\n", code);
         } else {
-            int index = t.indexOf(code);
-            t.remove(index);
+            t.remove(pos);
             System.out.printf("\nSuccessful! The book with code \"%s\" has been permanently removed.\n", code);
+        }
+
+        try {
+            saveDataToFile();
+        } catch (IOException ex) {
+            Logger.getLogger(BookList.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 
+    /**
+     * Load data from file.
+     */
     @Override
     public void exitProgram() {
         System.out.println("\nSee you again!");
         System.exit(0);
     }
 
+    /**
+     * Load data from file, replacing all given data. parameter to control the
+     * showing of success message
+     *
+     * @param isInMain
+     * @throws IOException
+     */
     @Override
-    public void loadDataFromFile() throws IOException {
-        final String pathToDB = "B:\\Assignments\\PRO192\\PRO192-Assignment\\src\\db.txt";
+    public void loadDataFromFile(boolean isInMain) throws IOException {
+        final String pathToDB = "db.txt";
+        int countRecords = 0;
 
         String lineCursor;
         String[] dataInLine;
@@ -174,6 +269,10 @@ public class BookList implements IBook {
 
         FileReader fr = null;
         BufferedReader br = null;
+
+        // remove all objects in ArrayList t
+        t.removeAll(t);
+
         try {
             fr = new FileReader(pathToDB);
             br = new BufferedReader(fr);
@@ -190,6 +289,7 @@ public class BookList implements IBook {
                     eQuantity = Integer.parseInt(dataInLine[2].trim());
                     ePrice = Double.parseDouble(dataInLine[3].trim());
                     t.add(new Book(eCode, eTitle, eQuantity, ePrice));
+                    countRecords++;
                 } catch (NumberFormatException ex) {
                     System.out.println(ex.getMessage());
                 }
@@ -203,13 +303,21 @@ public class BookList implements IBook {
             br.close();
         }
 
+        if (isInMain) {
+            System.out.println("\nThe list of book has been updated successfully!");
+            System.out.printf("(%d records)\n", countRecords);
+        }
     }
 
+    /**
+     * Save all new book records into file database
+     *
+     * @throws IOException
+     */
     @Override
     public void saveDataToFile() throws IOException {
-        final String pathToDB = "B:\\Assignments\\PRO192\\PRO192-Assignment\\src\\db.txt";
-        Book aBook = new Book();
-
+        final String pathToDB = "db.txt";
+        Book aBook;
         FileWriter fw = null;
         PrintWriter pw = null;
 
@@ -219,7 +327,7 @@ public class BookList implements IBook {
 
             for (int i = 0; i < t.size(); i++) {
                 aBook = t.get(i);
-                pw.printf("%15s  |  %15s  |  %15s  | %15s\r\n", aBook.getCode(), aBook.getTitle(), aBook.getQua(), aBook.getPrice());
+                pw.printf("%10s | %10s | %10s | %10s\r\n", aBook.getCode(), aBook.getTitle(), aBook.getQua(), aBook.getPrice());
             }
         } catch (IOException ex) {
             System.err.println(ex.getMessage());
@@ -227,6 +335,5 @@ public class BookList implements IBook {
             fw.close();
             pw.close();
         }
-
     }
 }
