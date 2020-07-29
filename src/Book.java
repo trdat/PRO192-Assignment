@@ -1,6 +1,4 @@
 
-import java.util.ArrayList;
-
 /**
  *
  * @author Dat Duy Tran
@@ -56,7 +54,6 @@ public class Book {
 
     @Override
     public String toString() {
-//        return this.code + "  |  " + this.title + "  |  " + this.qua + "  |  " + this.price;
         return String.format("%-15s%-15s%-15s%-15.2f\n", this.code,
                 this.title, this.qua, this.price);
     }
