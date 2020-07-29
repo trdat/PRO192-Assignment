@@ -2,13 +2,14 @@
 import java.util.Scanner;
 
 /**
+ * To prompt user to get their input while check its validity
  *
- * @author Dat Duy Tran
+ * @author trduy
  */
 public class GetInput {
 
-    static String errorMsgInt = "\nInvalid input. Please enter an integer value!\n";
-    static String errorMsgDouble = "\nInvalid input. Please enter a double value!\n";
+    static final String ERROR_MSG_INT = "\nInvalid input. Please enter an integer value!\n";
+    static final String ERROR_MSG_DOUBLE = "\nInvalid input. Please enter a double value!\n";
 
     public static int Integer(String prefixMsg) {
         int intVal = 0;
@@ -20,7 +21,7 @@ public class GetInput {
                 System.out.print(prefixMsg + ": ");
                 intVal = Integer.parseInt(getInput.nextLine());
             } catch (NumberFormatException ex) {
-                System.err.println(errorMsgInt);
+                System.err.println(ERROR_MSG_INT);
                 continue;
             }
             break;
@@ -39,7 +40,7 @@ public class GetInput {
                 System.out.print(prefixMsg + ": ");
                 intVal = Integer.parseInt(getInput.nextLine());
             } catch (NumberFormatException ex) {
-                System.err.println(errorMsgInt);
+                System.err.println(ERROR_MSG_INT);
                 continue;
             }
 
@@ -63,7 +64,7 @@ public class GetInput {
                 System.out.print(prefixMsg + ": ");
                 intVal = Double.parseDouble(getInput.nextLine());
             } catch (NumberFormatException ex) {
-                System.err.println(errorMsgInt);
+                System.err.println(ERROR_MSG_DOUBLE);
                 continue;
             }
             break;
@@ -82,12 +83,36 @@ public class GetInput {
                 System.out.print(prefixMsg + ": ");
                 doubleVal = Double.parseDouble(getInput.nextLine());
             } catch (NumberFormatException ex) {
-                System.err.println(errorMsgInt);
+                System.err.println(ERROR_MSG_DOUBLE);
                 continue;
             }
 
             if (doubleVal < min || doubleVal > max) {
-                System.err.format("\nInvalid input. Your input should be in valid range from %d to %d. Please try again!\n\n", min, max);
+                System.err.format("\nInvalid input. Your input should be in valid range from %.2f to %.2f Please try again!\n\n", min, max);
+            } else {
+                break;
+            }
+        }
+
+        return doubleVal;
+    }
+
+    public static double Double(String prefixMsg, double min) {
+        double doubleVal = 0;
+
+        Scanner getInput = new Scanner(System.in);
+
+        while (true) {
+            try {
+                System.out.print(prefixMsg + ": ");
+                doubleVal = Double.parseDouble(getInput.nextLine());
+            } catch (NumberFormatException ex) {
+                System.err.println(ERROR_MSG_DOUBLE);
+                continue;
+            }
+
+            if (doubleVal < min) {
+                System.err.format("\nInvalid input. Your input should be larger than %.2f\n\n", min);
             } else {
                 break;
             }
