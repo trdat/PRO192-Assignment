@@ -8,7 +8,7 @@ import java.util.ArrayList;
  */
 public interface IBook {
 
-    public void addOnes();
+    public void addOnes() throws IOException;
 
     public void displayAllBooks();
 
@@ -16,15 +16,17 @@ public interface IBook {
 
     public void updatePriceByCode();
 
-    public void findMaxPrice();
+    public int findMaxPriceIndex();
+
+    public void printMaxPriceValue();
 
     public void sortByCode();
 
     public void removeByCode();
 
-    public void loadDataFromFile() throws IOException;
-    
+    public void loadDataFromFile(boolean isInMain) throws IOException;
+
     public void saveDataToFile() throws IOException;
-    
+
     public void exitProgram();
 }
